@@ -4,7 +4,7 @@
 // ============================================
 
 const DB_NAME = "ereniceVelasDB";
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 const STORES_CONFIG = {
   fornecedores: { keyPath: "id", autoIncrement: true, indexes: ["nome"] },
@@ -22,7 +22,8 @@ const STORES_CONFIG = {
   metas: { keyPath: "id", autoIncrement: true, indexes: ["mes", "ano"] },
   perdas: { keyPath: "id", autoIncrement: true, indexes: ["produto_id", "data", "categoria"] },
   progresso_assistente: { keyPath: "id", autoIncrement: true },
-  promocoes: { keyPath: "id", autoIncrement: true, indexes: ["titulo"] }
+  promocoes: { keyPath: "id", autoIncrement: true, indexes: ["titulo"] },
+  concorrentes: { keyPath: "id", autoIncrement: true, indexes: ["concorrente", "produto"] }
 };
 
 let dbInstance = null;

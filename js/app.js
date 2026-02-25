@@ -16,6 +16,7 @@ import * as perdas from './modules/perdas.js';
 import * as backup from './modules/backup.js';
 import * as relatorios from './modules/relatorios.js';
 import * as promocoes from './modules/promocoes.js';
+import * as concorrentes from './modules/concorrentes.js';
 
 // Auth check
 if (localStorage.getItem("auth") !== "true") {
@@ -36,6 +37,7 @@ const MODULES = {
   backup:       { mod: backup,       titulo: 'Backup e Restauracao' },
   relatorios:   { mod: relatorios,   titulo: 'Relatorios' },
   promocoes:    { mod: promocoes,    titulo: 'Promocoes' },
+  concorrentes: { mod: concorrentes, titulo: 'Concorrentes' },
 };
 
 let rotaAtual = null;

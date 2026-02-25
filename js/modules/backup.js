@@ -14,8 +14,12 @@ const STORES_LABELS = {
   produtos: 'Produtos',
   pedidos: 'Pedidos',
   financeiro: 'Financeiro',
+  contas_pagar: 'Contas a Pagar',
+  contas_receber: 'Contas a Receber',
   metas: 'Metas',
-  perdas: 'Perdas'
+  perdas: 'Perdas',
+  promocoes: 'Promocoes',
+  concorrentes: 'Concorrentes'
 };
 
 const LS_KEY_LAST_BACKUP = 'erenice_last_backup';
