@@ -213,6 +213,24 @@ export async function init() {
       }
     }
 
+    // ---- Indicador de protecao dos dados ----
+    const alertasContainer = document.getElementById('painel-alertas');
+    if (alertasContainer) {
+      const tsBackup = localStorage.getItem('erenice_dados_seguranca_ts');
+      let msgProtecao = 'Seus dados estao salvos e protegidos neste computador.';
+      if (tsBackup) {
+        const dt = new Date(tsBackup);
+        const horaStr = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        msgProtecao = `Seus dados estao salvos e protegidos. Ultima gravacao: hoje as ${horaStr}.`;
+      }
+      alertasContainer.innerHTML = `
+        <div class="alert" style="background:var(--success-bg, #d4edda);color:var(--success-text, #155724);border:1px solid var(--success-border, #c3e6cb);">
+          <span class="material-symbols-outlined" style="color:var(--success-text, #155724);">verified_user</span>
+          <span>${msgProtecao}</span>
+        </div>
+      ` + alertasContainer.innerHTML;
+    }
+
     // ---- Recent orders (last 5, newest first) ----
     const tbodyEl = document.getElementById('painel-pedidos-tbody');
     if (tbodyEl) {

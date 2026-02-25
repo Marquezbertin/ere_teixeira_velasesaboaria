@@ -26,6 +26,70 @@ const STORES_CONFIG = {
 
 let dbInstance = null;
 
+// ---- Rede de seguranca localStorage ----
+const LS_BACKUP_KEY = 'erenice_dados_seguranca';
+const LS_BACKUP_TIMESTAMP_KEY = 'erenice_dados_seguranca_ts';
+let _backupTimer = null;
+
+// Salva copia de seguranca no localStorage (debounced)
+let _backupPendente = false;
+
+function agendarBackupLocal() {
+  _backupPendente = true;
+  if (_backupTimer) clearTimeout(_backupTimer);
+  _backupTimer = setTimeout(() => executarBackupLocalAgora(), 3000);
+}
+
+async function executarBackupLocalAgora() {
+  if (!_backupPendente) return;
+  try {
+    const backup = await exportarTudo();
+    const json = JSON.stringify(backup);
+    localStorage.setItem(LS_BACKUP_KEY, json);
+    localStorage.setItem(LS_BACKUP_TIMESTAMP_KEY, new Date().toISOString());
+    _backupPendente = false;
+  } catch (e) {
+    console.warn('Backup local de seguranca: sem espaco suficiente.', e);
+  }
+}
+
+// Quando a aba fica invisivel (usuario minimiza, troca de aba, ou vai fechar),
+// forca o backup imediatamente - isso acontece ANTES do navegador fechar
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && _backupPendente) {
+    if (_backupTimer) clearTimeout(_backupTimer);
+    executarBackupLocalAgora();
+  }
+});
+
+// Verifica se IndexedDB esta vazio e restaura do localStorage se necessario
+async function verificarERestaurarSeNecessario() {
+  try {
+    const backupJson = localStorage.getItem(LS_BACKUP_KEY);
+    if (!backupJson) return; // Sem backup local, nada a fazer
+
+    // Conta registros em todas as stores
+    let totalRegistros = 0;
+    const storeNames = Object.keys(STORES_CONFIG);
+    for (const name of storeNames) {
+      const registros = await listarTodos(name);
+      totalRegistros += registros.length;
+    }
+
+    // Se IndexedDB esta vazio mas tem backup local, restaura silenciosamente
+    if (totalRegistros === 0) {
+      const backup = JSON.parse(backupJson);
+      if (backup && backup._meta) {
+        console.log('IndexedDB vazio - restaurando dados da copia de seguranca...');
+        await importarTudo(backup);
+        console.log('Dados restaurados com sucesso da copia de seguranca!');
+      }
+    }
+  } catch (e) {
+    console.error('Erro ao verificar/restaurar backup local:', e);
+  }
+}
+
 export function abrirBanco() {
   if (dbInstance) return Promise.resolve(dbInstance);
 
@@ -56,8 +120,10 @@ export function abrirBanco() {
       }
     };
 
-    request.onsuccess = () => {
+    request.onsuccess = async () => {
       dbInstance = request.result;
+      // Verifica integridade e restaura se necessario
+      await verificarERestaurarSeNecessario();
       resolve(dbInstance);
     };
     request.onerror = () => reject(request.error);
@@ -72,7 +138,7 @@ export async function adicionar(storeName, dados) {
     const tx = db.transaction(storeName, "readwrite");
     const store = tx.objectStore(storeName);
     const req = store.add({ ...dados, data_criacao: dados.data_criacao || new Date().toISOString() });
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => { agendarBackupLocal(); resolve(req.result); };
     req.onerror = () => reject(req.error);
   });
 }
@@ -83,7 +149,7 @@ export async function atualizar(storeName, dados) {
     const tx = db.transaction(storeName, "readwrite");
     const store = tx.objectStore(storeName);
     const req = store.put(dados);
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => { agendarBackupLocal(); resolve(req.result); };
     req.onerror = () => reject(req.error);
   });
 }
@@ -94,7 +160,7 @@ export async function remover(storeName, id) {
     const tx = db.transaction(storeName, "readwrite");
     const store = tx.objectStore(storeName);
     const req = store.delete(id);
-    req.onsuccess = () => resolve();
+    req.onsuccess = () => { agendarBackupLocal(); resolve(); };
     req.onerror = () => reject(req.error);
   });
 }

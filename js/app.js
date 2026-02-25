@@ -70,6 +70,16 @@ window.navegarPara = function(rota) {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Solicita armazenamento persistente (impede o navegador de apagar dados)
+  if (navigator.storage && navigator.storage.persist) {
+    const isPersisted = await navigator.storage.persist();
+    if (isPersisted) {
+      console.log('Armazenamento persistente ativado - dados protegidos.');
+    } else {
+      console.warn('Armazenamento persistente nao foi concedido pelo navegador.');
+    }
+  }
+
   // Inicializa banco
   await abrirBanco();
 
@@ -109,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ============================================
 // BACKUP AUTOMATICO (a cada 7 dias)
 // ============================================
-const BACKUP_INTERVALO_DIAS = 7;
+const BACKUP_INTERVALO_DIAS = 1;
 const BACKUP_KEY = 'erenice_last_backup';
 
 async function verificarBackupAutomatico() {
