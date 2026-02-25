@@ -17,6 +17,31 @@ import {
 
 const STORE = 'insumos';
 let editandoId = null;
+let fornecedoresCache = [];
+
+// ---- Carregar fornecedores para o dropdown ----
+async function carregarFornecedores() {
+  try {
+    fornecedoresCache = await listarTodos('fornecedores');
+  } catch (e) {
+    fornecedoresCache = [];
+  }
+}
+
+function buildFornecedorOptions(selectedId) {
+  let html = '<option value="">-- Nenhum --</option>';
+  for (const f of fornecedoresCache) {
+    const sel = f.id === selectedId ? 'selected' : '';
+    html += `<option value="${f.id}" ${sel}>${escapeHtml(f.nome)}</option>`;
+  }
+  return html;
+}
+
+function getNomeFornecedor(id) {
+  if (!id) return '-';
+  const f = fornecedoresCache.find(x => x.id === id);
+  return f ? escapeHtml(f.nome) : '-';
+}
 
 // ---- Render (static shell + modal) ----
 export function render() {
@@ -34,6 +59,7 @@ export function render() {
         <thead>
           <tr>
             <th>Nome</th>
+            <th>Fornecedor</th>
             <th>Categoria</th>
             <th>Unidade</th>
             <th>Qtd. Atual</th>
@@ -44,7 +70,7 @@ export function render() {
           </tr>
         </thead>
         <tbody id="insumos-tbody">
-          <tr><td colspan="8">Carregando...</td></tr>
+          <tr><td colspan="9">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -65,6 +91,14 @@ export function render() {
                 <input type="text" id="ins-nome" required>
               </div>
               <div class="form-group">
+                <label for="ins-fornecedor">Fornecedor</label>
+                <select id="ins-fornecedor">
+                  <option value="">-- Nenhum --</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
                 <label for="ins-categoria">Categoria</label>
                 <select id="ins-categoria">
                   <option value="Oleos/Gorduras">\u00d3leos/Gorduras</option>
@@ -76,8 +110,6 @@ export function render() {
                   <option value="Outros">Outros</option>
                 </select>
               </div>
-            </div>
-            <div class="form-row">
               <div class="form-group">
                 <label for="ins-unidade_medida">Unidade de Medida</label>
                 <select id="ins-unidade_medida">
@@ -88,20 +120,20 @@ export function render() {
                   <option value="un">un</option>
                 </select>
               </div>
+            </div>
+            <div class="form-row">
               <div class="form-group">
                 <label for="ins-quantidade_atual">Qtd. Atual</label>
                 <input type="number" id="ins-quantidade_atual" step="0.01" min="0" value="0">
               </div>
-            </div>
-            <div class="form-row">
               <div class="form-group">
                 <label for="ins-custo_unitario">Custo Unit\u00e1rio (R$)</label>
                 <input type="number" id="ins-custo_unitario" step="0.01" min="0" value="0">
               </div>
-              <div class="form-group">
-                <label for="ins-estoque_minimo">Estoque M\u00ednimo</label>
-                <input type="number" id="ins-estoque_minimo" step="0.01" min="0" value="0">
-              </div>
+            </div>
+            <div class="form-group">
+              <label for="ins-estoque_minimo">Estoque M\u00ednimo</label>
+              <input type="number" id="ins-estoque_minimo" step="0.01" min="0" value="0">
             </div>
           </form>
         </div>
@@ -122,7 +154,7 @@ function renderTabela(insumos) {
   if (insumos.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8">
+        <td colspan="9">
           <div class="empty-state">
             <span class="empty-icon material-symbols-outlined">inventory_2</span>
             <p>Nenhum insumo cadastrado.</p>
@@ -137,6 +169,7 @@ function renderTabela(insumos) {
   tbody.innerHTML = insumos.map(i => `
     <tr>
       <td>${escapeHtml(i.nome)}</td>
+      <td>${getNomeFornecedor(i.fornecedor_id)}</td>
       <td>${escapeHtml(i.categoria)}</td>
       <td>${escapeHtml(i.unidade_medida)}</td>
       <td>${Number(i.quantidade_atual).toFixed(2)}</td>
@@ -158,6 +191,7 @@ function renderTabela(insumos) {
 // ---- Load data and render ----
 async function carregar() {
   try {
+    await carregarFornecedores();
     const insumos = await listarTodos(STORE);
     renderTabela(insumos);
   } catch (error) {
@@ -166,10 +200,12 @@ async function carregar() {
 }
 
 // ---- Open modal for new insumo ----
-function abrirNovo() {
+async function abrirNovo() {
   editandoId = null;
   document.getElementById('modalInsumoTitulo').textContent = 'Novo Insumo';
   document.getElementById('formInsumo').reset();
+  await carregarFornecedores();
+  document.getElementById('ins-fornecedor').innerHTML = buildFornecedorOptions(null);
   abrirModal('modalInsumo');
 }
 
@@ -181,6 +217,9 @@ async function abrirEdicao(id) {
 
     editandoId = id;
     document.getElementById('modalInsumoTitulo').textContent = 'Editar Insumo';
+
+    await carregarFornecedores();
+    document.getElementById('ins-fornecedor').innerHTML = buildFornecedorOptions(insumo.fornecedor_id);
 
     document.getElementById('ins-nome').value = insumo.nome || '';
     document.getElementById('ins-categoria').value = insumo.categoria || 'Outros';
@@ -203,8 +242,11 @@ async function salvar() {
     return;
   }
 
+  const fornecedorVal = document.getElementById('ins-fornecedor').value;
+
   const dados = {
     nome,
+    fornecedor_id: fornecedorVal ? Number(fornecedorVal) : null,
     categoria: document.getElementById('ins-categoria').value,
     unidade_medida: document.getElementById('ins-unidade_medida').value,
     quantidade_atual: parseFloat(document.getElementById('ins-quantidade_atual').value) || 0,
@@ -215,7 +257,6 @@ async function salvar() {
   try {
     if (editandoId) {
       dados.id = editandoId;
-      // Preserve original creation date
       const original = await buscarPorId(STORE, editandoId);
       dados.data_criacao = original?.data_criacao || new Date().toISOString();
       await atualizar(STORE, dados);
@@ -249,19 +290,13 @@ async function removeInsumo(id) {
 
 // ---- Init (load data + set up listeners) ----
 export async function init() {
-  // Load and render data
   await carregar();
 
-  // Modal close handlers (overlay, X, cancel button)
   initModalClose('modalInsumo');
 
-  // "Novo Insumo" button
   document.getElementById('btnNovoInsumo')?.addEventListener('click', abrirNovo);
-
-  // Save button
   document.getElementById('btnSalvarInsumo')?.addEventListener('click', salvar);
 
-  // Delegate edit/delete clicks on the table body
   document.getElementById('insumos-tbody')?.addEventListener('click', (e) => {
     const btnEditar = e.target.closest('.btn-editar');
     if (btnEditar) {
