@@ -68,7 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
       errorEl.className = 'lockout-msg';
       return;
     }
-    const user = document.getElementById("username").value.trim();
     const pass = document.getElementById("password").value;
     if (!pass) {
       errorEl.textContent = "Digite sua senha.";
@@ -76,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     const hashDigitado = await gerarHash(pass);
-    if (user === USER_FIXO && hashDigitado === HASH_SENHA) {
+    if (hashDigitado === HASH_SENHA) {
       localStorage.setItem("auth", "true");
       localStorage.removeItem("login_tentativas");
       localStorage.removeItem("login_bloqueio");

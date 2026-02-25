@@ -28,6 +28,11 @@ export function render() {
       Produtos sao gerados automaticamente pela Producao. Aqui voce pode ajustar os precos de venda.
     </div>
 
+    <div class="search-box">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" id="busca-produtos" placeholder="Buscar produto..." autocomplete="off">
+    </div>
+
     <div class="table-container">
       <table class="table">
         <thead>
@@ -128,13 +133,22 @@ function renderTabela(produtos) {
 }
 
 // ---- Load data and render ----
+let dadosCache = [];
 async function carregar() {
   try {
-    const produtos = await listarTodos(STORE);
-    renderTabela(produtos);
+    dadosCache = await listarTodos(STORE);
+    filtrarEExibir();
   } catch (error) {
     console.error('Erro ao carregar produtos:', error);
   }
+}
+
+function filtrarEExibir() {
+  const busca = (document.getElementById('busca-produtos')?.value || '').toLowerCase();
+  const filtrados = busca
+    ? dadosCache.filter(p => (p.nome || '').toLowerCase().includes(busca))
+    : dadosCache;
+  renderTabela(filtrados);
 }
 
 // ---- Update margin preview in modal ----
@@ -207,6 +221,9 @@ export async function init() {
 
   // Save button
   document.getElementById('btnSalvarProduto')?.addEventListener('click', salvar);
+
+  // Search
+  document.getElementById('busca-produtos')?.addEventListener('input', filtrarEExibir);
 
   // Live margin preview when preco changes
   document.getElementById('prd-preco')?.addEventListener('input', atualizarMargemPreview);

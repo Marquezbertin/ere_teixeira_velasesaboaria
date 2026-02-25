@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#4a6741"/>
+  <text x="256" y="300" text-anchor="middle" font-size="260" font-family="Segoe UI, sans-serif" font-weight="bold" fill="#f9f6f0">ET</text>
+  <text x="256" y="400" text-anchor="middle" font-size="80" font-family="Segoe UI, sans-serif" fill="#c4a87c">V&amp;S</text>
+</svg>

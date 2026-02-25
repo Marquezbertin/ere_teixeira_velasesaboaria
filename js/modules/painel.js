@@ -44,6 +44,9 @@ export function render() {
       <!-- Meta do Mes -->
       <div id="painel-meta"></div>
 
+      <!-- Guia de primeiro uso -->
+      <div id="painel-guia"></div>
+
       <!-- Pedidos Recentes -->
       <div id="painel-pedidos-recentes">
         <h3 class="section-title">Pedidos Recentes</h3>
@@ -210,6 +213,29 @@ export async function init() {
             </a>
           </div>
         `;
+      }
+    }
+
+    // ---- Guia de primeiro uso (se nao tem dados) ----
+    const guiaEl = document.getElementById('painel-guia');
+    if (guiaEl) {
+      const totalDados = insumos.length + receitas.length + produtos.length + pedidos.length;
+      if (totalDados === 0) {
+        guiaEl.innerHTML = `
+          <div class="card" style="border-left: 4px solid var(--primary);">
+            <h3 style="margin-bottom:12px;">Bem-vinda ao seu Sistema de Gestao!</h3>
+            <p style="margin-bottom:12px;">Para comecar, siga estes passos simples:</p>
+            <ol style="padding-left:20px;line-height:2;">
+              <li><a href="#" onclick="navegarPara('fornecedores');return false;" style="color:var(--primary);font-weight:600;">Cadastre seus Fornecedores</a> (de quem voce compra materiais)</li>
+              <li><a href="#" onclick="navegarPara('insumos');return false;" style="color:var(--primary);font-weight:600;">Cadastre seus Insumos</a> (oleos, essencias, corantes...)</li>
+              <li><a href="#" onclick="navegarPara('receitas');return false;" style="color:var(--primary);font-weight:600;">Crie suas Receitas</a> (formulas dos seus produtos)</li>
+              <li><a href="#" onclick="navegarPara('producao');return false;" style="color:var(--primary);font-weight:600;">Registre uma Producao</a> (para criar produtos)</li>
+              <li><a href="#" onclick="navegarPara('pedidos');return false;" style="color:var(--primary);font-weight:600;">Lance seus Pedidos</a> (vendas para clientes)</li>
+            </ol>
+          </div>
+        `;
+      } else {
+        guiaEl.innerHTML = '';
       }
     }
 

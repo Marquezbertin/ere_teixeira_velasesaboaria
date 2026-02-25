@@ -37,6 +37,11 @@ export function render() {
       </button>
     </div>
 
+    <div class="search-box">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" id="busca-pedidos" placeholder="Buscar por cliente..." autocomplete="off">
+    </div>
+
     <div class="tabs" id="pedidos-tabs">
       <button class="tab-btn active" data-filtro="todos">Todos</button>
       <button class="tab-btn" data-filtro="pendente">Pendentes</button>
@@ -141,10 +146,16 @@ function renderTabela(pedidos) {
   const tbody = document.getElementById('pedidos-tbody');
   if (!tbody) return;
 
-  // Apply filter
-  const lista = filtroAtual === 'todos'
+  // Apply status filter
+  let lista = filtroAtual === 'todos'
     ? pedidos
     : pedidos.filter(p => p.status === filtroAtual);
+
+  // Apply text search
+  const busca = (document.getElementById('busca-pedidos')?.value || '').toLowerCase();
+  if (busca) {
+    lista = lista.filter(p => (p.cliente_nome || '').toLowerCase().includes(busca));
+  }
 
   if (lista.length === 0) {
     tbody.innerHTML = `
@@ -749,6 +760,9 @@ export async function init() {
     itensContainer.addEventListener('input', handleItemEvents);
     itensContainer.addEventListener('click', handleItemEvents);
   }
+
+  // Search
+  document.getElementById('busca-pedidos')?.addEventListener('input', carregar);
 
   // Filter tabs
   document.getElementById('pedidos-tabs')?.addEventListener('click', handleFiltro);

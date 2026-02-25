@@ -789,6 +789,34 @@ tbody tr:last-child td { border-bottom: none; }
   border-bottom-color: var(--primary);
 }
 
+/* ---- SEARCH BOX ---- */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  margin-bottom: 16px;
+}
+.search-box .material-symbols-outlined {
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+}
+.search-box input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.9rem;
+  color: var(--text);
+  width: 100%;
+  font-family: inherit;
+}
+.search-box input::placeholder {
+  color: var(--text-secondary);
+}
+
 /* ---- SECTION DIVIDER ---- */
 .section-title {
   font-size: 0.95rem;
@@ -797,6 +825,16 @@ tbody tr:last-child td { border-bottom: none; }
   margin: 20px 0 12px;
   padding-bottom: 6px;
   border-bottom: 2px solid var(--accent-light);
+}
+
+/* ---- FOOTER ---- */
+.app-footer {
+  text-align: center;
+  padding: 20px 16px;
+  margin-top: 32px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
 }
 
 /* ---- RESPONSIVE ---- */

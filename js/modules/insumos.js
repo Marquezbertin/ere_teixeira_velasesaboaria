@@ -3,7 +3,7 @@
 // Nervo Saboaria - ERP Artesanal
 // ============================================
 
-import { listarTodos, adicionar, atualizar, remover, buscarPorId } from '../db.js';
+import { listarTodos, adicionar, atualizar, remover, buscarPorId, buscarPorIndice } from '../db.js';
 import {
   formatarMoeda,
   notificar,
@@ -52,6 +52,11 @@ export function render() {
         <span class="material-symbols-outlined">add</span>
         Novo Insumo
       </button>
+    </div>
+
+    <div class="search-box">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" id="busca-insumos" placeholder="Buscar insumo..." autocomplete="off">
     </div>
 
     <div class="table-container">
@@ -189,14 +194,23 @@ function renderTabela(insumos) {
 }
 
 // ---- Load data and render ----
+let dadosCache = [];
 async function carregar() {
   try {
     await carregarFornecedores();
-    const insumos = await listarTodos(STORE);
-    renderTabela(insumos);
+    dadosCache = await listarTodos(STORE);
+    filtrarEExibir();
   } catch (error) {
     console.error('Erro ao carregar insumos:', error);
   }
+}
+
+function filtrarEExibir() {
+  const busca = (document.getElementById('busca-insumos')?.value || '').toLowerCase();
+  const filtrados = busca
+    ? dadosCache.filter(i => (i.nome || '').toLowerCase().includes(busca) || (i.categoria || '').toLowerCase().includes(busca))
+    : dadosCache;
+  renderTabela(filtrados);
 }
 
 // ---- Open modal for new insumo ----
@@ -274,11 +288,25 @@ async function salvar() {
   }
 }
 
-// ---- Remove with confirmation ----
+// ---- Remove with confirmation (checks if used in recipes) ----
 async function removeInsumo(id) {
-  if (!confirmar('Deseja remover este insumo?')) return;
-
   try {
+    // Verifica se o insumo esta sendo usado em alguma receita
+    const usos = await buscarPorIndice('receita_insumos', 'insumo_id', id);
+    if (usos.length > 0) {
+      // Busca nomes das receitas que usam este insumo
+      const nomes = [];
+      for (const uso of usos) {
+        const receita = await buscarPorId('receitas', uso.receita_id);
+        if (receita) nomes.push(receita.nome_produto || 'Receita sem nome');
+      }
+      const listaReceitas = nomes.length > 0 ? nomes.join(', ') : `${usos.length} receita(s)`;
+      notificar(`Este insumo esta sendo usado em: ${listaReceitas}. Remova das receitas primeiro.`, 'erro');
+      return;
+    }
+
+    if (!confirmar('Deseja remover este insumo?')) return;
+
     await remover(STORE, id);
     notificar('Insumo removido!');
     await carregar();
@@ -296,6 +324,7 @@ export async function init() {
 
   document.getElementById('btnNovoInsumo')?.addEventListener('click', abrirNovo);
   document.getElementById('btnSalvarInsumo')?.addEventListener('click', salvar);
+  document.getElementById('busca-insumos')?.addEventListener('input', filtrarEExibir);
 
   document.getElementById('insumos-tbody')?.addEventListener('click', (e) => {
     const btnEditar = e.target.closest('.btn-editar');

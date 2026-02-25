@@ -29,6 +29,11 @@ export function render() {
       </button>
     </div>
 
+    <div class="search-box">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" id="busca-fornecedores" placeholder="Buscar fornecedor..." autocomplete="off">
+    </div>
+
     <div class="table-container">
       <table class="table">
         <thead>
@@ -130,13 +135,22 @@ function renderTabela(fornecedores) {
 }
 
 // ---- Load data and render ----
+let dadosCache = [];
 async function carregar() {
   try {
-    const fornecedores = await listarTodos(STORE);
-    renderTabela(fornecedores);
+    dadosCache = await listarTodos(STORE);
+    filtrarEExibir();
   } catch (error) {
     console.error('Erro ao carregar fornecedores:', error);
   }
+}
+
+function filtrarEExibir() {
+  const busca = (document.getElementById('busca-fornecedores')?.value || '').toLowerCase();
+  const filtrados = busca
+    ? dadosCache.filter(f => (f.nome || '').toLowerCase().includes(busca) || (f.contato || '').toLowerCase().includes(busca) || (f.email || '').toLowerCase().includes(busca))
+    : dadosCache;
+  renderTabela(filtrados);
 }
 
 // ---- Open modal for new supplier ----
@@ -232,6 +246,9 @@ export async function init() {
 
   // Save button
   document.getElementById('btnSalvarFornecedor')?.addEventListener('click', salvar);
+
+  // Busca
+  document.getElementById('busca-fornecedores')?.addEventListener('input', filtrarEExibir);
 
   // Delegate edit/delete clicks on the table body
   document.getElementById('fornecedores-tbody')?.addEventListener('click', (e) => {

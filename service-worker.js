@@ -1,4 +1,4 @@
-const CACHE_NAME = 'erenice-velas-v3';
+const CACHE_NAME = 'erenice-velas-v4';
 
 const ASSETS = [
   './',
@@ -21,7 +21,8 @@ const ASSETS = [
   './js/modules/perdas.js',
   './js/modules/backup.js',
   './js/modules/relatorios.js',
-  './manifest.json'
+  './manifest.json',
+  './icon.svg'
 ];
 
 self.addEventListener('install', (event) => {

@@ -114,6 +114,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Backup automatico periodico
   verificarBackupAutomatico();
+
+  // Indicador de offline/online
+  const offlineBanner = document.createElement('div');
+  offlineBanner.id = 'offlineBanner';
+  offlineBanner.style.cssText = 'display:none;position:fixed;bottom:0;left:0;right:0;background:#c49a2a;color:#fff;text-align:center;padding:8px;font-size:0.85rem;z-index:9999;';
+  offlineBanner.textContent = 'Voce esta sem internet. Pode continuar trabalhando normalmente - seus dados estao seguros.';
+  document.body.appendChild(offlineBanner);
+
+  function atualizarStatusConexao() {
+    offlineBanner.style.display = navigator.onLine ? 'none' : 'block';
+  }
+  window.addEventListener('online', atualizarStatusConexao);
+  window.addEventListener('offline', atualizarStatusConexao);
+  atualizarStatusConexao();
 });
 
 // ============================================
@@ -148,40 +162,14 @@ async function verificarBackupAutomatico() {
 
 async function executarBackupAutomatico() {
   try {
+    // Backup silencioso - salva no localStorage sem abrir dialogo de download
     const dados = await exportarTudo();
-    const json = JSON.stringify(dados, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-
-    const hoje = new Date();
-    const dataStr = hoje.toISOString().split('T')[0];
-    const nomeArquivo = `backup-erenice-velas-${dataStr}.json`;
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = nomeArquivo;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
+    const json = JSON.stringify(dados);
+    localStorage.setItem('erenice_dados_seguranca', json);
+    localStorage.setItem('erenice_dados_seguranca_ts', new Date().toISOString());
     localStorage.setItem(BACKUP_KEY, Date.now().toString());
-
-    // Notificacao visual
-    mostrarNotificacaoBackup(nomeArquivo);
+    console.log('Backup automatico silencioso realizado com sucesso.');
   } catch (err) {
     console.error('Falha no backup automatico:', err);
   }
-}
-
-function mostrarNotificacaoBackup(nomeArquivo) {
-  const toast = document.createElement('div');
-  toast.className = 'toast toast-sucesso';
-  toast.innerHTML = `Backup automatico salvo: <strong>${nomeArquivo}</strong>`;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.classList.add('show'), 50);
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
-  }, 5000);
 }
