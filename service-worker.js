@@ -1,4 +1,4 @@
-const CACHE_NAME = 'erenice-velas-v5';
+const CACHE_NAME = 'erenice-velas-v6';
 
 const ASSETS = [
   './',
@@ -21,6 +21,7 @@ const ASSETS = [
   './js/modules/perdas.js',
   './js/modules/backup.js',
   './js/modules/relatorios.js',
+  './js/modules/promocoes.js',
   './manifest.json',
   './icon.svg'
 ];

@@ -15,6 +15,7 @@ import * as metas from './modules/metas.js';
 import * as perdas from './modules/perdas.js';
 import * as backup from './modules/backup.js';
 import * as relatorios from './modules/relatorios.js';
+import * as promocoes from './modules/promocoes.js';
 
 // Auth check
 if (localStorage.getItem("auth") !== "true") {
@@ -34,6 +35,7 @@ const MODULES = {
   perdas:       { mod: perdas,       titulo: 'Perdas' },
   backup:       { mod: backup,       titulo: 'Backup e Restauracao' },
   relatorios:   { mod: relatorios,   titulo: 'Relatorios' },
+  promocoes:    { mod: promocoes,    titulo: 'Promocoes' },
 };
 
 let rotaAtual = null;
