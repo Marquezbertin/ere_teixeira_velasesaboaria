@@ -1,4 +1,4 @@
-const CACHE_NAME = 'erenice-velas-v4';
+const CACHE_NAME = 'erenice-velas-v5';
 
 const ASSETS = [
   './',

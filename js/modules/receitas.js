@@ -189,6 +189,9 @@ function renderTabela(receitas) {
         <button class="btn btn-icon btn-sm btn-ver" data-id="${r.id}" title="Ver Detalhes">
           <span class="material-symbols-outlined">visibility</span>
         </button>
+        <button class="btn btn-icon btn-sm btn-imprimir-receita" data-id="${r.id}" title="Imprimir Receita">
+          <span class="material-symbols-outlined">print</span>
+        </button>
         <button class="btn btn-icon btn-sm btn-editar" data-id="${r.id}" title="Editar">
           <span class="material-symbols-outlined">edit</span>
         </button>
@@ -198,6 +201,65 @@ function renderTabela(receitas) {
       </td>
     </tr>
   `).join('');
+}
+
+// ---- Print recipe sheet ----
+async function imprimirReceita(id) {
+  try {
+    const receita = await buscarPorId(STORE, id);
+    if (!receita) return;
+
+    await carregarInsumos();
+    const receitaInsumos = await buscarPorIndice(STORE_INSUMOS_RECEITA, 'receita_id', id);
+
+    let ingredientesHtml = '';
+    for (const ri of receitaInsumos) {
+      const insumo = insumosCache.find(i => i.id === ri.insumo_id);
+      ingredientesHtml += `<tr>
+        <td>${insumo ? insumo.nome : 'Insumo removido'}</td>
+        <td style="text-align:center">${Number(ri.quantidade_utilizada).toFixed(2)}</td>
+        <td style="text-align:center">${insumo ? insumo.unidade_medida : '-'}</td>
+      </tr>`;
+    }
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+      <title>Receita - ${receita.nome_produto}</title>
+      <style>
+        body{font-family:'Segoe UI',sans-serif;max-width:500px;margin:0 auto;padding:20px;color:#333;}
+        h1{font-size:1.2rem;text-align:center;color:#4a6741;margin-bottom:2px;}
+        .sub{text-align:center;color:#999;font-size:0.85rem;margin-bottom:16px;}
+        h2{font-size:1rem;color:#4a6741;margin:16px 0 8px;border-bottom:2px solid #4a6741;padding-bottom:4px;}
+        .info{display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px;}
+        table{width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:8px;}
+        th{text-align:left;border-bottom:2px solid #4a6741;padding:6px 4px;font-size:0.8rem;}
+        td{padding:5px 4px;border-bottom:1px solid #eee;}
+        .notes{margin-top:20px;border:1px dashed #ccc;padding:12px;min-height:60px;font-size:0.8rem;color:#999;}
+        .footer{text-align:center;font-size:0.75rem;color:#999;margin-top:20px;border-top:1px solid #eee;padding-top:10px;}
+        @media print{body{margin:0;padding:10px;}}
+      </style>
+    </head><body>
+      <h1>Erenice Teixeira</h1>
+      <div class="sub">Velas & Saboaria - Ficha de Receita</div>
+      <h2>${receita.nome_produto}</h2>
+      <div class="info"><span>Rendimento: ${receita.rendimento || 0} unidades</span><span>Custo/un: ${formatarMoeda(receita.custo_unitario)}</span></div>
+      <div class="info"><span>Custo total: ${formatarMoeda(receita.custo_total)}</span><span>Margem: ${Number(receita.margem_desejada || 0).toFixed(1)}%</span></div>
+      <h2>Ingredientes</h2>
+      <table>
+        <thead><tr><th>Insumo</th><th style="text-align:center">Quantidade</th><th style="text-align:center">Unidade</th></tr></thead>
+        <tbody>${ingredientesHtml}</tbody>
+      </table>
+      <div class="notes"><strong>Anotacoes:</strong><br><br></div>
+      <div class="footer">Desenvolvido por Bruno Bertin Marquez</div>
+      <script>window.onload=function(){window.print();}<\/script>
+    </body></html>`;
+
+    const janela = window.open('', '_blank');
+    janela.document.write(html);
+    janela.document.close();
+  } catch (error) {
+    console.error('Erro ao imprimir receita:', error);
+    notificar('Erro ao gerar impressao.', 'erro');
+  }
 }
 
 // ---- Load insumos for dropdown ----
@@ -633,6 +695,13 @@ export async function init() {
     if (btnVer) {
       const id = Number(btnVer.dataset.id);
       verDetalhe(id);
+      return;
+    }
+
+    const btnImprimir = e.target.closest('.btn-imprimir-receita');
+    if (btnImprimir) {
+      const id = Number(btnImprimir.dataset.id);
+      imprimirReceita(id);
       return;
     }
 

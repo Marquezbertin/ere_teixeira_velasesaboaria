@@ -209,6 +209,20 @@ function renderTabela(pedidos) {
       `;
     }
 
+    // WhatsApp share (always available)
+    acoesBtns += `
+      <button class="btn btn-icon btn-sm btn-whatsapp" data-id="${p.id}" title="Enviar por WhatsApp" style="background:#25d366;color:#fff;">
+        <span class="material-symbols-outlined">share</span>
+      </button>
+    `;
+
+    // Print receipt (always available)
+    acoesBtns += `
+      <button class="btn btn-icon btn-sm btn-imprimir" data-id="${p.id}" title="Imprimir Comprovante">
+        <span class="material-symbols-outlined">print</span>
+      </button>
+    `;
+
     // Delete always available
     acoesBtns += `
       <button class="btn btn-icon btn-sm btn-danger btn-remover" data-id="${p.id}" title="Remover">
@@ -664,6 +678,101 @@ async function removePedido(id) {
   }
 }
 
+// ---- Share order via WhatsApp ----
+async function compartilharWhatsApp(id) {
+  try {
+    const pedido = await buscarPorId(STORE, id);
+    if (!pedido) return;
+
+    const todosItens = await listarTodos(STORE_ITENS);
+    const itensDoPedido = todosItens.filter(i => i.pedido_id === id);
+
+    let texto = `*Erenice Teixeira - Velas & Saboaria*\n`;
+    texto += `Pedido #${pedido.id}\n`;
+    texto += `━━━━━━━━━━━━━━━\n`;
+    texto += `Cliente: ${pedido.cliente_nome}\n`;
+    texto += `Data: ${formatarData(pedido.data_pedido)}\n\n`;
+    texto += `*Itens:*\n`;
+
+    for (const item of itensDoPedido) {
+      const subtotal = (item.quantidade || 0) * (item.preco_unitario || 0);
+      texto += `  ${item.quantidade}x ${item.produto_nome} - ${formatarMoeda(subtotal)}\n`;
+    }
+
+    texto += `\n━━━━━━━━━━━━━━━\n`;
+    texto += `*Total: ${formatarMoeda(pedido.valor_total)}*\n`;
+    texto += `Pagamento: ${pedido.forma_pagamento || '-'}\n`;
+    texto += `Status: ${pedido.status}\n`;
+
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+    window.open(url, '_blank');
+  } catch (error) {
+    console.error('Erro ao compartilhar via WhatsApp:', error);
+    notificar('Erro ao gerar mensagem.', 'erro');
+  }
+}
+
+// ---- Print order receipt ----
+async function imprimirPedido(id) {
+  try {
+    const pedido = await buscarPorId(STORE, id);
+    if (!pedido) return;
+
+    const todosItens = await listarTodos(STORE_ITENS);
+    const itensDoPedido = todosItens.filter(i => i.pedido_id === id);
+
+    let itensHtml = '';
+    for (const item of itensDoPedido) {
+      const subtotal = (item.quantidade || 0) * (item.preco_unitario || 0);
+      itensHtml += `<tr>
+        <td>${item.produto_nome}</td>
+        <td style="text-align:center">${item.quantidade}</td>
+        <td style="text-align:right">${formatarMoeda(item.preco_unitario)}</td>
+        <td style="text-align:right">${formatarMoeda(subtotal)}</td>
+      </tr>`;
+    }
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+      <title>Pedido #${pedido.id}</title>
+      <style>
+        body{font-family:'Segoe UI',sans-serif;max-width:400px;margin:0 auto;padding:20px;color:#333;}
+        h1{font-size:1.2rem;text-align:center;color:#4a6741;margin-bottom:2px;}
+        .sub{text-align:center;color:#999;font-size:0.85rem;margin-bottom:16px;}
+        .info{font-size:0.85rem;margin-bottom:12px;}
+        table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+        th{text-align:left;border-bottom:2px solid #4a6741;padding:6px 4px;font-size:0.8rem;}
+        td{padding:5px 4px;border-bottom:1px solid #eee;}
+        .total{font-size:1.1rem;font-weight:bold;text-align:right;margin-top:12px;padding-top:8px;border-top:2px solid #4a6741;}
+        .footer{text-align:center;font-size:0.75rem;color:#999;margin-top:20px;border-top:1px solid #eee;padding-top:10px;}
+        @media print{body{margin:0;padding:10px;}}
+      </style>
+    </head><body>
+      <h1>Erenice Teixeira</h1>
+      <div class="sub">Velas & Saboaria</div>
+      <div class="info">
+        <strong>Pedido #${pedido.id}</strong><br>
+        Cliente: ${pedido.cliente_nome}<br>
+        Data: ${formatarData(pedido.data_pedido)}<br>
+        Pagamento: ${pedido.forma_pagamento || '-'}
+      </div>
+      <table>
+        <thead><tr><th>Produto</th><th style="text-align:center">Qtd</th><th style="text-align:right">Unit.</th><th style="text-align:right">Subtotal</th></tr></thead>
+        <tbody>${itensHtml}</tbody>
+      </table>
+      <div class="total">Total: ${formatarMoeda(pedido.valor_total)}</div>
+      <div class="footer">Obrigada pela preferencia!<br>Desenvolvido por Bruno Bertin Marquez</div>
+      <script>window.onload=function(){window.print();}<\/script>
+    </body></html>`;
+
+    const janela = window.open('', '_blank');
+    janela.document.write(html);
+    janela.document.close();
+  } catch (error) {
+    console.error('Erro ao imprimir pedido:', error);
+    notificar('Erro ao gerar impressao.', 'erro');
+  }
+}
+
 // ---- Handle item events (delegated) ----
 function handleItemEvents(e) {
   const target = e.target;
@@ -796,6 +905,20 @@ export async function init() {
     if (btnEditar) {
       const id = Number(btnEditar.dataset.id);
       abrirEdicao(id);
+      return;
+    }
+
+    const btnWhatsApp = e.target.closest('.btn-whatsapp');
+    if (btnWhatsApp) {
+      const id = Number(btnWhatsApp.dataset.id);
+      compartilharWhatsApp(id);
+      return;
+    }
+
+    const btnImprimir = e.target.closest('.btn-imprimir');
+    if (btnImprimir) {
+      const id = Number(btnImprimir.dataset.id);
+      imprimirPedido(id);
       return;
     }
 
