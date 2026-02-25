@@ -14,6 +14,7 @@ import * as financeiro from './modules/financeiro.js';
 import * as metas from './modules/metas.js';
 import * as perdas from './modules/perdas.js';
 import * as backup from './modules/backup.js';
+import * as relatorios from './modules/relatorios.js';
 
 // Auth check
 if (localStorage.getItem("auth") !== "true") {
@@ -32,6 +33,7 @@ const MODULES = {
   metas:        { mod: metas,        titulo: 'Metas' },
   perdas:       { mod: perdas,       titulo: 'Perdas' },
   backup:       { mod: backup,       titulo: 'Backup e Restauracao' },
+  relatorios:   { mod: relatorios,   titulo: 'Relatorios' },
 };
 
 let rotaAtual = null;

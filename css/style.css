@@ -861,3 +861,217 @@ tbody tr:last-child td { border-bottom: none; }
     padding: 24px;
   }
 }
+
+/* ---- RELATORIOS (Report Preview) ---- */
+.relatorio-preview {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  min-height: 200px;
+}
+
+.rel-cabecalho {
+  text-align: center;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--accent-light);
+}
+
+.rel-cabecalho h2 {
+  color: var(--primary-dark);
+  font-size: 1.3rem;
+  margin-bottom: 4px;
+}
+
+.rel-cabecalho h3 {
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.rel-cabecalho p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.rel-resumo {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.rel-resumo-item {
+  flex: 1;
+  min-width: 160px;
+  background: var(--primary-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+
+.rel-resumo-item.rel-entrada {
+  border-left: 3px solid var(--success);
+}
+
+.rel-resumo-item.rel-saida {
+  border-left: 3px solid var(--danger);
+}
+
+.rel-resumo-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.rel-resumo-valor {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.rel-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin: 24px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--accent-light);
+}
+
+.rel-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.rel-table thead th {
+  background: var(--primary-bg);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border);
+}
+
+.rel-table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.rel-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rel-badge-ok {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.rel-badge-warning {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.rel-badge-danger {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.rel-alerta {
+  background: var(--warning-bg);
+  border: 1px solid #e8d48a;
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-top: 8px;
+}
+
+.rel-alerta ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.rel-alerta li {
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.rel-vazio {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ---- PRINT (PDF Export) ---- */
+@media print {
+  body {
+    background: white;
+    color: #000;
+  }
+
+  .sidebar,
+  .topbar,
+  .menu-toggle,
+  .module-header,
+  .card:not(.relatorio-preview),
+  #sidebar,
+  .sidebar-footer {
+    display: none !important;
+  }
+
+  .app-layout {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+  }
+
+  .content-area {
+    padding: 0 !important;
+  }
+
+  .content-area > *:not(.relatorio-preview) {
+    display: none !important;
+  }
+
+  .relatorio-preview {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    background: white;
+  }
+
+  .rel-cabecalho {
+    border-bottom-color: #ccc;
+  }
+
+  .rel-resumo-item {
+    background: #f5f5f5;
+    border-color: #ccc;
+  }
+
+  .rel-table thead th {
+    background: #f0f0f0;
+    border-bottom-color: #999;
+  }
+
+  .rel-table tbody td {
+    border-bottom-color: #ddd;
+  }
+
+  .rel-section-title {
+    border-bottom-color: #ccc;
+  }
+}
