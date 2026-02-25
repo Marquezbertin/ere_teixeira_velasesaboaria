@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Erenice Teixeira - Gestao</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="manifest" href="./manifest.json">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2>Erenice Teixeira</h2>
+        <span class="brand-sub">Velas &amp; Saboaria</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Principal</div>
+        <button class="nav-item active" data-route="painel">
+          <span class="nav-icon">&#127968;</span> Painel
+        </button>
+
+        <div class="nav-section-title">Cadastros</div>
+        <button class="nav-item" data-route="fornecedores">
+          <span class="nav-icon">&#128101;</span> Fornecedores
+        </button>
+        <button class="nav-item" data-route="insumos">
+          <span class="nav-icon">&#128230;</span> Insumos
+        </button>
+        <button class="nav-item" data-route="receitas">
+          <span class="nav-icon">&#128221;</span> Receitas
+        </button>
+
+        <div class="nav-section-title">Operacoes</div>
+        <button class="nav-item" data-route="producao">
+          <span class="nav-icon">&#9881;</span> Producao
+        </button>
+        <button class="nav-item" data-route="produtos">
+          <span class="nav-icon">&#127863;</span> Produtos
+        </button>
+        <button class="nav-item" data-route="pedidos">
+          <span class="nav-icon">&#128722;</span> Pedidos
+        </button>
+
+        <div class="nav-section-title">Financeiro</div>
+        <button class="nav-item" data-route="financeiro">
+          <span class="nav-icon">&#128176;</span> Financeiro
+        </button>
+        <button class="nav-item" data-route="metas">
+          <span class="nav-icon">&#127919;</span> Metas
+        </button>
+        <button class="nav-item" data-route="perdas">
+          <span class="nav-icon">&#9888;</span> Perdas
+        </button>
+
+        <div class="nav-section-title">Sistema</div>
+        <button class="nav-item" data-route="backup">
+          <span class="nav-icon">&#128190;</span> Backup
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-item" id="logoutBtn">
+          <span class="nav-icon">&#128682;</span> Sair
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main-content">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="menu-toggle" id="menuToggle">&#9776;</button>
+          <h1 id="pageTitle">Painel</h1>
+        </div>
+        <div class="topbar-right">
+          <span id="topbarDate"></span>
+        </div>
+      </div>
+      <div class="content-area" id="appContent">
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js');
+    }
+  </script>
+</body>
+</html>
